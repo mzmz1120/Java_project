@@ -1,9 +1,0 @@
-/**
- * 
- */
-/**
- * @author oinseong
- *
- */
-module NetworkProject {
-}
