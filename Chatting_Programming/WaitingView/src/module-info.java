@@ -1,0 +1,9 @@
+/**
+ * 
+ */
+/**
+ * @author mzmzk
+ *
+ */
+module WaitingView {
+}
