@@ -18,4 +18,6 @@ class ChatMsg implements Serializable {
 		this.UserName = UserName;
 		this.data = msg;
 	}
+	
+	
 }
