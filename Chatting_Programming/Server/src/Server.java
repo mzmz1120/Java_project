@@ -108,44 +108,38 @@ public class Server extends JFrame {
 		contentPane.add(btnServerStart);
 	}
 
-	// 새로운 참가자 accept() 하고 user thread를 새로 생성한다.
 	class AcceptServer extends Thread {
 		@SuppressWarnings("unchecked")
 		public void run() {
-			while (true) { // 사용자 접속을 계속해서 받기 위해 while문
+			while (true) { 
 				try {
 					AppendText("Waiting new clients ...");
-					client_socket = socket.accept(); // accept가 일어나기 전까지는 무한 대기중
+					client_socket = socket.accept(); 
 					AppendText("새로운 참가자 from " + client_socket);
-					// User 당 하나씩 Thread 생성
+					
 					UserService new_user = new UserService(client_socket);
-					UserVec.add(new_user); // 새로운 참가자 배열에 추가
-					new_user.start(); // 만든 객체의 스레드 실행
+					UserVec.add(new_user); 
+					new_user.start(); 
 					AppendText("현재 참가자 수 " + UserVec.size());
 				} catch (IOException e) {
 					AppendText("accept() error");
-					// System.exit(0);
 				}
 			}
 		}
 	}
 
 	public void AppendText(String str) {
-		// textArea.append("사용자로부터 들어온 메세지 : " + str+"\n");
 		textArea.append(str + "\n");
 		textArea.setCaretPosition(textArea.getText().length());
 	}
 
 	public void AppendObject(ChatMsg msg) {
-		// textArea.append("사용자로부터 들어온 object : " + str+"\n");
 		textArea.append("code = " + msg.code + "\n");
 		textArea.append("id = " + msg.UserName + "\n");
 		textArea.append("data = " + msg.data + "\n");
 		textArea.setCaretPosition(textArea.getText().length());
 	}
 
-	// User 당 생성되는 Thread
-	// Read One 에서 대기 -> Write All
 	class UserService extends Thread {
 		private InputStream is;
 		private OutputStream os;
@@ -161,30 +155,15 @@ public class Server extends JFrame {
 		public String UserStatus;
 
 		public UserService(Socket client_socket) {
-			// TODO Auto-generated constructor stub
-			// 매개변수로 넘어온 자료 저장
+	
 			this.client_socket = client_socket;
 			this.user_vc = UserVec;
 			try {
-//				is = client_socket.getInputStream();
-//				dis = new DataInputStream(is);
-//				os = client_socket.getOutputStream();
-//				dos = new DataOutputStream(os);
 
 				oos = new ObjectOutputStream(client_socket.getOutputStream());
 				oos.flush();
 				ois = new ObjectInputStream(client_socket.getInputStream());
 
-				// line1 = dis.readUTF();
-				// /login user1 ==> msg[0] msg[1]
-//				byte[] b = new byte[BUF_LEN];
-//				dis.read(b);		
-//				String line1 = new String(b);
-//
-//				//String[] msg = line1.split(" ");
-//				//UserName = msg[1].trim();
-//				UserStatus = "O"; // Online 상태
-//				Login();
 			} catch (Exception e) {
 				AppendText("userService error");
 			}
@@ -200,12 +179,11 @@ public class Server extends JFrame {
 
 		public void Logout() {
 			String msg = "[" + UserName + "]님이 퇴장 하였습니다.\n";
-			UserVec.removeElement(this); // Logout한 현재 객체를 벡터에서 지운다
-			WriteAll(msg); // 나를 제외한 다른 User들에게 전송
+			UserVec.removeElement(this); 
+			WriteAll(msg); 
 			AppendText("사용자 " + "[" + UserName + "] 퇴장. 현재 참가자 수 " + UserVec.size());
 		}
-
-		// 모든 User들에게 방송. 각각의 UserService Thread의 WriteONe() 을 호출한다.
+		
 		public void WriteAll(String str) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
@@ -213,7 +191,6 @@ public class Server extends JFrame {
 					user.WriteOne(str);
 			}
 		}
-		// 모든 User들에게 Object를 방송. 채팅 message와 image object를 보낼 수 있다
 		public void WriteAllObject(Object ob) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
@@ -222,7 +199,6 @@ public class Server extends JFrame {
 			}
 		}
 
-		// 나를 제외한 User들에게 방송. 각각의 UserService Thread의 WriteONe() 을 호출한다.
 		public void WriteOthers(String str) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
@@ -231,7 +207,6 @@ public class Server extends JFrame {
 			}
 		}
 
-		// Windows 처럼 message 제외한 나머지 부분은 NULL 로 만들기 위한 함수
 		public byte[] MakePacket(String msg) {
 			byte[] packet = new byte[BUF_LEN];
 			byte[] bb = null;
@@ -241,7 +216,7 @@ public class Server extends JFrame {
 			try {
 				bb = msg.getBytes("euc-kr");
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			}
 			for (i = 0; i < bb.length; i++)
@@ -321,24 +296,6 @@ public class Server extends JFrame {
 		public void run() {
 			while (true) { // 사용자 접속을 계속해서 받기 위해 while문
 				try {
-					// String msg = dis.readUTF();
-//					byte[] b = new byte[BUF_LEN];
-//					int ret;
-//					ret = dis.read(b);
-//					if (ret < 0) {
-//						AppendText("dis.read() < 0 error");
-//						try {
-//							dos.close();
-//							dis.close();
-//							client_socket.close();
-//							Logout();
-//							break;
-//						} catch (Exception ee) {
-//							break;
-//						} // catch문 끝
-//					}
-//					String msg = new String(b, "euc-kr");
-//					msg = msg.trim(); // 앞뒤 blank NULL, \n 모두 제거
 					Object obcm = null;
 					String msg = null;
 					ChatMsg cm = null;
