@@ -115,7 +115,8 @@ public class ClientMain extends JFrame {
 			String username = txtUserName.getText().trim();
 			String ip_addr = txtIpAddress.getText().trim();
 			String port_no = txtPortNumber.getText().trim();
-			ClientView view = new ClientView(username, ip_addr, port_no);
+			WaitingView view = new WaitingView();
+			ClientView view2 = new ClientView(username, ip_addr, port_no);
 			setVisible(false);
 		}
 	}

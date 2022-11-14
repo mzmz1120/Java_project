@@ -77,7 +77,6 @@ public class ClientView extends JFrame {
 	private JButton imgBtn;
 
 	JPanel panel;
-	private JLabel lblMouseEvent;
 	private Graphics gc;
 	private int pen_size = 2; // minimum 2
 	// 그려진 Image를 보관하는 용도, paint() 함수에서 이용한다.
@@ -92,8 +91,9 @@ public class ClientView extends JFrame {
 	public ClientView(String username, String ip_addr, String port_no) {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 634);
+		setBounds(100, 100, 383, 634);
 		contentPane = new JPanel();
+		contentPane.setBackground(Color.YELLOW);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -147,35 +147,8 @@ public class ClientView extends JFrame {
 		btnNewButton.setBounds(295, 539, 69, 40);
 		contentPane.add(btnNewButton);
 
-		panel = new JPanel();
-		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel.setBackground(Color.WHITE);
-		panel.setBounds(376, 10, 400, 520);
-		contentPane.add(panel);
-		gc = panel.getGraphics();
-
-		// Image 영역 보관용. paint() 에서 이용한다.
-		panelImage = createImage(panel.getWidth(), panel.getHeight());
-		gc2 = panelImage.getGraphics();
-		gc2.setColor(panel.getBackground());
-		gc2.fillRect(0, 0, panel.getWidth(), panel.getHeight());
-		gc2.setColor(Color.BLACK);
-		gc2.drawRect(0, 0, panel.getWidth() - 1, panel.getHeight() - 1);
-
-		lblMouseEvent = new JLabel("<dynamic>");
-		lblMouseEvent.setHorizontalAlignment(SwingConstants.CENTER);
-		lblMouseEvent.setFont(new Font("굴림", Font.BOLD, 14));
-		lblMouseEvent.setBorder(new LineBorder(new Color(0, 0, 0)));
-		lblMouseEvent.setBackground(Color.WHITE);
-		lblMouseEvent.setBounds(376, 539, 400, 40);
-		contentPane.add(lblMouseEvent);
-
 		try {
 			socket = new Socket(ip_addr, Integer.parseInt(port_no));
-//			is = socket.getInputStream();
-//			dis = new DataInputStream(is);
-//			os = socket.getOutputStream();
-//			dos = new DataOutputStream(os);
 
 			oos = new ObjectOutputStream(socket.getOutputStream());
 			oos.flush();
@@ -193,11 +166,8 @@ public class ClientView extends JFrame {
 			txtInput.requestFocus();
 			ImageSendAction action2 = new ImageSendAction();
 			imgBtn.addActionListener(action2);
-			MyMouseEvent mouse = new MyMouseEvent();
-			panel.addMouseMotionListener(mouse);
-			panel.addMouseListener(mouse);
-			MyMouseWheelEvent wheel = new MyMouseWheelEvent();
-			panel.addMouseWheelListener(wheel);
+
+		
 
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
@@ -205,12 +175,6 @@ public class ClientView extends JFrame {
 			AppendText("connect error");
 		}
 
-	}
-
-	public void paint(Graphics g) {
-		super.paint(g);
-		// Image 영역이 가려졌다 다시 나타날 때 그려준다.
-		gc.drawImage(panelImage, 0, 0, this);
 	}
 
 	// Server Message를 수신해서 화면에 표시
@@ -250,9 +214,6 @@ public class ClientView extends JFrame {
 							AppendText("[" + cm.UserName + "]");
 						AppendImage(cm.img);
 						break;
-					case "500": // Mouse Event 수신
-						DoMouseEvent(cm);
-						break;
 					}
 				} catch (IOException e) {
 					AppendText("ois.readObject() error");
@@ -270,98 +231,6 @@ public class ClientView extends JFrame {
 				} // 바깥 catch문끝
 
 			}
-		}
-	}
-
-	// Mouse Event 수신 처리
-	public void DoMouseEvent(ChatMsg cm) {
-		Color c;
-		if (cm.UserName.matches(UserName)) // 본인 것은 이미 Local 로 그렸다.
-			return;
-		c = new Color(255, 0, 0); // 다른 사람 것은 Red
-		gc2.setColor(c);
-		gc2.fillOval(cm.mouse_e.getX() - pen_size / 2, cm.mouse_e.getY() - cm.pen_size / 2, cm.pen_size, cm.pen_size);
-		gc.drawImage(panelImage, 0, 0, panel);
-	}
-
-	public void SendMouseEvent(MouseEvent e) {
-		ChatMsg cm = new ChatMsg(UserName, "500", "MOUSE");
-		cm.mouse_e = e;
-		cm.pen_size = pen_size;
-		SendObject(cm);
-	}
-
-	class MyMouseWheelEvent implements MouseWheelListener {
-		@Override
-		public void mouseWheelMoved(MouseWheelEvent e) {
-			// TODO Auto-generated method stub
-			if (e.getWheelRotation() < 0) { // 위로 올리는 경우 pen_size 증가
-				if (pen_size < 20)
-					pen_size++;
-			} else {
-				if (pen_size > 2)
-					pen_size--;
-			}
-			lblMouseEvent.setText("mouseWheelMoved Rotation=" + e.getWheelRotation() + " pen_size = " + pen_size + " "
-					+ e.getX() + "," + e.getY());
-
-		}
-
-	}
-
-	// Mouse Event Handler
-	class MyMouseEvent implements MouseListener, MouseMotionListener {
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mouseDragged " + e.getX() + "," + e.getY());// 좌표출력가능
-			Color c = new Color(0, 0, 255);
-			gc2.setColor(c);
-			gc2.fillOval(e.getX() - pen_size / 2, e.getY() - pen_size / 2, pen_size, pen_size);
-			// panelImnage는 paint()에서 이용한다.
-			gc.drawImage(panelImage, 0, 0, panel);
-			SendMouseEvent(e);
-		}
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mouseMoved " + e.getX() + "," + e.getY());
-		}
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mouseClicked " + e.getX() + "," + e.getY());
-			Color c = new Color(0, 0, 255);
-			gc2.setColor(c);
-			gc2.fillOval(e.getX() - pen_size / 2, e.getY() - pen_size / 2, pen_size, pen_size);
-			gc.drawImage(panelImage, 0, 0, panel);
-			SendMouseEvent(e);
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mouseEntered " + e.getX() + "," + e.getY());
-			// panel.setBackground(Color.YELLOW);
-
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mouseExited " + e.getX() + "," + e.getY());
-			// panel.setBackground(Color.CYAN);
-
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mousePressed " + e.getX() + "," + e.getY());
-
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			lblMouseEvent.setText(e.getButton() + " mouseReleased " + e.getX() + "," + e.getY());
-			// 드래그중 멈출시 보임
-
 		}
 	}
 
@@ -418,8 +287,6 @@ public class ClientView extends JFrame {
 		// textArea.append(msg + "\n");
 		// AppendIcon(icon1);
 		msg = msg.trim(); // 앞뒤 blank와 \n을 제거한다.
-		// textArea.setCaretPosition(len);
-		// textArea.replaceSelection(msg + "\n");
 
 		StyledDocument doc = textArea.getStyledDocument();
 		SimpleAttributeSet left = new SimpleAttributeSet();
@@ -520,23 +387,18 @@ public class ClientView extends JFrame {
 	// Server에게 network으로 전송
 	public void SendMessage(String msg) {
 		try {
-			// dos.writeUTF(msg);
-//			byte[] bb;
-//			bb = MakePacket(msg);
-//			dos.write(bb, 0, bb.length);
+	
 			ChatMsg obcm = new ChatMsg(UserName, "200", msg);
 			oos.writeObject(obcm);
 		} catch (IOException e) {
-			// AppendText("dos.write() error");
+
 			AppendText("oos.writeObject() error");
 			try {
-//				dos.close();
-//				dis.close();
+
 				ois.close();
 				oos.close();
 				socket.close();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 				System.exit(0);
 			}
@@ -547,7 +409,6 @@ public class ClientView extends JFrame {
 		try {
 			oos.writeObject(ob);
 		} catch (IOException e) {
-			// textArea.append("메세지 송신 에러!!\n");
 			AppendText("SendObject Error");
 		}
 	}

@@ -28,9 +28,6 @@ import javax.swing.SwingConstants;
 
 public class Server extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	JTextArea textArea;
@@ -111,15 +108,15 @@ public class Server extends JFrame {
 	class AcceptServer extends Thread {
 		@SuppressWarnings("unchecked")
 		public void run() {
-			while (true) { 
+			while (true) {
 				try {
 					AppendText("Waiting new clients ...");
-					client_socket = socket.accept(); 
+					client_socket = socket.accept();
 					AppendText("새로운 참가자 from " + client_socket);
-					
+
 					UserService new_user = new UserService(client_socket);
-					UserVec.add(new_user); 
-					new_user.start(); 
+					UserVec.add(new_user);
+					new_user.start();
 					AppendText("현재 참가자 수 " + UserVec.size());
 				} catch (IOException e) {
 					AppendText("accept() error");
@@ -151,11 +148,12 @@ public class Server extends JFrame {
 
 		private Socket client_socket;
 		private Vector user_vc;
+		
 		public String UserName = "";
 		public String UserStatus;
 
 		public UserService(Socket client_socket) {
-	
+
 			this.client_socket = client_socket;
 			this.user_vc = UserVec;
 			try {
@@ -179,11 +177,11 @@ public class Server extends JFrame {
 
 		public void Logout() {
 			String msg = "[" + UserName + "]님이 퇴장 하였습니다.\n";
-			UserVec.removeElement(this); 
-			WriteAll(msg); 
+			UserVec.removeElement(this);
+			WriteAll(msg);
 			AppendText("사용자 " + "[" + UserName + "] 퇴장. 현재 참가자 수 " + UserVec.size());
 		}
-		
+
 		public void WriteAll(String str) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
@@ -191,6 +189,7 @@ public class Server extends JFrame {
 					user.WriteOne(str);
 			}
 		}
+
 		public void WriteAllObject(Object ob) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
@@ -216,7 +215,7 @@ public class Server extends JFrame {
 			try {
 				bb = msg.getBytes("euc-kr");
 			} catch (UnsupportedEncodingException e) {
-				
+
 				e.printStackTrace();
 			}
 			for (i = 0; i < bb.length; i++)
@@ -227,17 +226,11 @@ public class Server extends JFrame {
 		// UserService Thread가 담당하는 Client 에게 1:1 전송
 		public void WriteOne(String msg) {
 			try {
-				// dos.writeUTF(msg);
-//				byte[] bb;
-//				bb = MakePacket(msg);
-//				dos.write(bb, 0, bb.length);
 				ChatMsg obcm = new ChatMsg("SERVER", "200", msg);
 				oos.writeObject(obcm);
 			} catch (IOException e) {
 				AppendText("dos.writeObject() error");
 				try {
-//					dos.close();
-//					dis.close();
 					ois.close();
 					oos.close();
 					client_socket.close();
@@ -272,19 +265,19 @@ public class Server extends JFrame {
 				Logout(); // 에러가난 현재 객체를 벡터에서 지운다
 			}
 		}
+
 		public void WriteOneObject(Object ob) {
 			try {
-			    oos.writeObject(ob);
-			} 
-			catch (IOException e) {
-				AppendText("oos.writeObject(ob) error");		
+				oos.writeObject(ob);
+			} catch (IOException e) {
+				AppendText("oos.writeObject(ob) error");
 				try {
 					ois.close();
 					oos.close();
 					client_socket.close();
 					client_socket = null;
 					ois = null;
-					oos = null;				
+					oos = null;
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -292,7 +285,7 @@ public class Server extends JFrame {
 				Logout();
 			}
 		}
-		
+
 		public void run() {
 			while (true) { // 사용자 접속을 계속해서 받기 위해 while문
 				try {
@@ -308,6 +301,7 @@ public class Server extends JFrame {
 						e.printStackTrace();
 						return;
 					}
+
 					if (obcm == null)
 						break;
 					if (obcm instanceof ChatMsg) {
@@ -315,11 +309,17 @@ public class Server extends JFrame {
 						AppendObject(cm);
 					} else
 						continue;
-					if (cm.code.matches("100")) {
+					if (cm.code.matches("100")) { // 로그인
 						UserName = cm.UserName;
 						UserStatus = "O"; // Online 상태
 						Login();
-					} else if (cm.code.matches("200")) {
+					} else if(cm.code.matches("101")) {
+						
+					} else if(cm.code.matches("102")) {
+						
+					}
+					
+				else if (cm.code.matches("200")) {
 						msg = String.format("[%s] %s", cm.UserName, cm.data);
 						AppendText(msg); // server 화면에 출력
 						String[] args = msg.split(" "); // 단어들을 분리한다.
@@ -353,13 +353,12 @@ public class Server extends JFrame {
 									}
 									// /to 빼고.. [귓속말] [user1] Hello user2..
 									user.WritePrivate(args[0] + " " + msg2 + "\n");
-									//user.WriteOne("[귓속말] " + args[0] + " " + msg2 + "\n");
+									// user.WriteOne("[귓속말] " + args[0] + " " + msg2 + "\n");
 									break;
 								}
 							}
-						} else { // 일반 채팅 메시지
+						} else {
 							UserStatus = "O";
-							//WriteAll(msg + "\n"); // Write All
 							WriteAllObject(cm);
 						}
 					} else if (cm.code.matches("400")) { // logout message 처리
@@ -367,12 +366,10 @@ public class Server extends JFrame {
 						break;
 					} else { // 300, 500, ... 기타 object는 모두 방송한다.
 						WriteAllObject(cm);
-					} 
+					}
 				} catch (IOException e) {
 					AppendText("ois.readObject() error");
 					try {
-//						dos.close();
-//						dis.close();
 						ois.close();
 						oos.close();
 						client_socket.close();
