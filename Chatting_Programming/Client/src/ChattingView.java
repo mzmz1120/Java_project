@@ -49,7 +49,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-public class ClientView extends JFrame {
+public class ChattingView extends JFrame {
 	/**
 	 * 
 	 */
@@ -88,7 +88,7 @@ public class ClientView extends JFrame {
 	 * 
 	 * @throws BadLocationException
 	 */
-	public ClientView(String username, String ip_addr, String port_no) {
+	public ChattingView(String username, String ip_addr, String port_no) {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 383, 634);
