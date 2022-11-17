@@ -1,9 +1,0 @@
-/**
- * 
- */
-/**
- * @author mzmzk
- *
- */
-module WaitingView {
-}
