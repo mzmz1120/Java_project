@@ -39,7 +39,7 @@ public class WaitingView extends JFrame {
 
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(255, 255, 255));
-		panel.setBounds(97, 10, 342, 555);
+		panel.setBounds(102, 0, 342, 555);
 		contentPane.add(panel);
 		panel.setLayout(null);
 
@@ -57,14 +57,33 @@ public class WaitingView extends JFrame {
 		listOnMember.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		listOnMember.setBounds(23, 109, 295, 423);
 		panel.add(listOnMember);
+		
+		
+		
 
-		JButton btnNewButton_1 = new JButton("New button");
-		btnNewButton_1.setBounds(215, 72, 103, 23);
+		JButton btnNewButton_1 = new JButton("");
+		ImageIcon plus_icon = new ImageIcon (WaitingView.class.getResource("/image/다운로드.png"));
+		Image plus_img = plus_icon.getImage();
+		Image plus_changeImage = plus_img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+		ImageIcon plus_changeIcon = new ImageIcon(plus_changeImage);
+		
+		btnNewButton_1.setIcon(plus_changeIcon);
+		btnNewButton_1.setBounds(215, 33, 103, 62);
 		panel.add(btnNewButton_1);
 
-		JButton button = new JButton("\uCC44 \uD305 \uBC29");
-		button.setBounds(0, 142, 97, 23);
+		
+		JButton button = new JButton("");
+		ImageIcon chat_icon = new ImageIcon(WaitingView.class.getResource("/image/free-icon-speech-bubble-151808.png"));
+		Image chat_img = chat_icon.getImage();
+		Image chat_changeImage = chat_img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+		ImageIcon chat_changeIcon = new ImageIcon(chat_changeImage);
+		
+		button.setIcon(chat_changeIcon);
+		button.setBounds(0, 95, 97, 87);
 		contentPane.add(button);
+		
+		button.setForeground(new Color(204, 204, 204));
+		button.setBackground(new Color(204, 204, 204));
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				textField.setText("대화방");
@@ -82,7 +101,7 @@ public class WaitingView extends JFrame {
 			}
 		});
 
-		ImageIcon icon = new ImageIcon(WaitingView.class.getResource("/image/people.png"));
+		ImageIcon icon = new ImageIcon(WaitingView.class.getResource("/image/free-icon-user-747376.png"));
 		Image img = icon.getImage();
 		Image chageImage = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
 		ImageIcon changeIcon = new ImageIcon(chageImage);
