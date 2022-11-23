@@ -36,6 +36,7 @@ public class Server extends JFrame {
 	private ServerSocket socket; // 서버소켓
 	private Socket client_socket; // accept() 에서 생성된 client 소켓
 	private Vector UserVec = new Vector(); // 연결된 사용자를 저장할 벡터
+	private Vector RoomVec = new Vector(); // 생성된 방룸
 	private static final int BUF_LEN = 128; // Windows 처럼 BUF_LEN 을 정의
 
 	/**
@@ -148,9 +149,11 @@ public class Server extends JFrame {
 
 		private Socket client_socket;
 		private Vector user_vc;
-		
+
 		public String UserName = "";
-		public String UserStatus;
+		public Boolean UserStatus;
+		public String id = "";
+		public String roomID = "";
 
 		public UserService(Socket client_socket) {
 
@@ -182,10 +185,10 @@ public class Server extends JFrame {
 			AppendText("사용자 " + "[" + UserName + "] 퇴장. 현재 참가자 수 " + UserVec.size());
 		}
 
-		public void WriteAll(String str) {
+		public void WriteAll(String str) { // 따지면 이건 필요 없게?된다? 아니 단체 채팅일때 필요함
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
-				if (user.UserStatus == "O")
+				if (user.UserStatus == true)
 					user.WriteOne(str);
 			}
 		}
@@ -193,7 +196,7 @@ public class Server extends JFrame {
 		public void WriteAllObject(Object ob) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
-				if (user.UserStatus == "O")
+				if (user.UserStatus == true)
 					user.WriteOneObject(ob);
 			}
 		}
@@ -201,7 +204,7 @@ public class Server extends JFrame {
 		public void WriteOthers(String str) {
 			for (int i = 0; i < user_vc.size(); i++) {
 				UserService user = (UserService) user_vc.elementAt(i);
-				if (user != this && user.UserStatus == "O")
+				if (user != this && user.UserStatus == true)
 					user.WriteOne(str);
 			}
 		}
@@ -226,7 +229,7 @@ public class Server extends JFrame {
 		// UserService Thread가 담당하는 Client 에게 1:1 전송
 		public void WriteOne(String msg) {
 			try {
-				ChatMsg obcm = new ChatMsg("SERVER", "200", msg);
+				ChatMsg obcm = new ChatMsg("SERVER", "200","1234", msg);
 				oos.writeObject(obcm);
 			} catch (IOException e) {
 				AppendText("dos.writeObject() error");
@@ -248,7 +251,7 @@ public class Server extends JFrame {
 		// 귓속말 전송
 		public void WritePrivate(String msg) {
 			try {
-				ChatMsg obcm = new ChatMsg("귓속말", "200", msg);
+				ChatMsg obcm = new ChatMsg("귓속말", "200","1234", msg);
 				oos.writeObject(obcm);
 			} catch (IOException e) {
 				AppendText("dos.writeObject() error");
@@ -311,60 +314,26 @@ public class Server extends JFrame {
 						continue;
 					if (cm.code.matches("100")) { // 로그인
 						UserName = cm.UserName;
-						UserStatus = "O"; // Online 상태
+						UserStatus = true;
 						Login();
-					} else if(cm.code.matches("101")) {
+					} else if (cm.code.matches("101")) { // 서버에서 유저 목록을 알림
+						WriteAllObject(UserVec);
+					} else if (cm.code.matches("102")) { // 대기방에 다른 유저 목록 보이기
+
+					} else if(cm.code.matches("103")) { // 대기방에 다른 채팅방 목록 보이기
 						
-					} else if(cm.code.matches("102")) {
+					} else if (cm.code.matches("200")) { // 채팅방내에서 채팅
+
+					} else if (cm.code.matches("201")) { // 채팅방 내에서 이모티콘 보내기
+
+					} else if(cm.code.matches("202")) { // 채팅방 내에서 이미지 보내기
 						
-					}
-					
-				else if (cm.code.matches("200")) {
-						msg = String.format("[%s] %s", cm.UserName, cm.data);
-						AppendText(msg); // server 화면에 출력
-						String[] args = msg.split(" "); // 단어들을 분리한다.
-						if (args.length == 1) { // Enter key 만 들어온 경우 Wakeup 처리만 한다.
-							UserStatus = "O";
-						} else if (args[1].matches("/exit")) {
-							Logout();
-							break;
-						} else if (args[1].matches("/list")) {
-							WriteOne("User list\n");
-							WriteOne("Name\tStatus\n");
-							WriteOne("-----------------------------\n");
-							for (int i = 0; i < user_vc.size(); i++) {
-								UserService user = (UserService) user_vc.elementAt(i);
-								WriteOne(user.UserName + "\t" + user.UserStatus + "\n");
-							}
-							WriteOne("-----------------------------\n");
-						} else if (args[1].matches("/sleep")) {
-							UserStatus = "S";
-						} else if (args[1].matches("/wakeup")) {
-							UserStatus = "O";
-						} else if (args[1].matches("/to")) { // 귓속말
-							for (int i = 0; i < user_vc.size(); i++) {
-								UserService user = (UserService) user_vc.elementAt(i);
-								if (user.UserName.matches(args[2]) && user.UserStatus.matches("O")) {
-									String msg2 = "";
-									for (int j = 3; j < args.length; j++) {// 실제 message 부분
-										msg2 += args[j];
-										if (j < args.length - 1)
-											msg2 += " ";
-									}
-									// /to 빼고.. [귓속말] [user1] Hello user2..
-									user.WritePrivate(args[0] + " " + msg2 + "\n");
-									// user.WriteOne("[귓속말] " + args[0] + " " + msg2 + "\n");
-									break;
-								}
-							}
-						} else {
-							UserStatus = "O";
-							WriteAllObject(cm);
-						}
-					} else if (cm.code.matches("400")) { // logout message 처리
+					}else if(cm.code.matches("203")) { // 채팅방 나가기
+						
+					} else if (cm.code.matches("800")) { // logout message 처리
 						Logout();
 						break;
-					} else { // 300, 500, ... 기타 object는 모두 방송한다.
+					} else {
 						WriteAllObject(cm);
 					}
 				} catch (IOException e) {

@@ -78,8 +78,6 @@ public class ChattingView extends JFrame {
 
 	JPanel panel;
 	private Graphics gc;
-	private int pen_size = 2; // minimum 2
-	// 그려진 Image를 보관하는 용도, paint() 함수에서 이용한다.
 	private Image panelImage = null;
 	private Graphics gc2 = null;
 
@@ -139,7 +137,7 @@ public class ChattingView extends JFrame {
 		btnNewButton.setFont(new Font("굴림", Font.PLAIN, 14));
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ChatMsg msg = new ChatMsg(UserName, "400", "Bye");
+				ChatMsg msg = new ChatMsg(UserName, "400","1234", "Bye");
 				SendObject(msg);
 				System.exit(0);
 			}
@@ -154,8 +152,8 @@ public class ChattingView extends JFrame {
 			oos.flush();
 			ois = new ObjectInputStream(socket.getInputStream());
 
-			// SendMessage("/login " + UserName);
-			ChatMsg obcm = new ChatMsg(UserName, "100", "Hello");
+			
+			ChatMsg obcm = new ChatMsg(UserName, "100","1234","Hello");
 			SendObject(obcm);
 
 			ListenNetwork net = new ListenNetwork();
@@ -264,7 +262,7 @@ public class ChattingView extends JFrame {
 				fd.setVisible(true);
 				// System.out.println(fd.getDirectory() + fd.getFile());
 				if (fd.getDirectory().length() > 0 && fd.getFile().length() > 0) {
-					ChatMsg obcm = new ChatMsg(UserName, "300", "IMG");
+					ChatMsg obcm = new ChatMsg(UserName, "300","1234", "IMG");
 					ImageIcon img = new ImageIcon(fd.getDirectory() + fd.getFile());
 					obcm.img = img;
 					SendObject(obcm);
@@ -356,16 +354,11 @@ public class ChattingView extends JFrame {
 		len = textArea.getDocument().getLength();
 		textArea.setCaretPosition(len);
 		textArea.replaceSelection("\n");
-		// ImageViewAction viewaction = new ImageViewAction();
-		// new_icon.addActionListener(viewaction); // 내부클래스로 액션 리스너를 상속받은 클래스로
-		// panelImage = ori_img.getScaledInstance(panel.getWidth(), panel.getHeight(),
-		// Image.SCALE_DEFAULT);
 
 		gc2.drawImage(ori_img, 0, 0, panel.getWidth(), panel.getHeight(), panel);
 		gc.drawImage(panelImage, 0, 0, panel.getWidth(), panel.getHeight(), panel);
 	}
 
-	// Windows 처럼 message 제외한 나머지 부분은 NULL 로 만들기 위한 함수
 	public byte[] MakePacket(String msg) {
 		byte[] packet = new byte[BUF_LEN];
 		byte[] bb = null;
@@ -384,11 +377,10 @@ public class ChattingView extends JFrame {
 		return packet;
 	}
 
-	// Server에게 network으로 전송
 	public void SendMessage(String msg) {
 		try {
 	
-			ChatMsg obcm = new ChatMsg(UserName, "200", msg);
+			ChatMsg obcm = new ChatMsg(UserName, "200","1234", msg);
 			oos.writeObject(obcm);
 		} catch (IOException e) {
 
@@ -405,7 +397,7 @@ public class ChattingView extends JFrame {
 		}
 	}
 
-	public void SendObject(Object ob) { // 서버로 메세지를 보내는 메소드
+	public void SendObject(Object ob) { 
 		try {
 			oos.writeObject(ob);
 		} catch (IOException e) {
