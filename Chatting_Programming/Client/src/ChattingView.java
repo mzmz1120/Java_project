@@ -310,6 +310,7 @@ public class ChattingView extends JFrame {
 		SimpleAttributeSet right = new SimpleAttributeSet();
 		StyleConstants.setAlignment(right, StyleConstants.ALIGN_RIGHT);
 		StyleConstants.setForeground(right, Color.BLUE);
+		StyleConstants.setBackground(right, Color.WHITE);
 		doc.setParagraphAttributes(doc.getLength(), 1, right, false);
 		try {
 			doc.insertString(doc.getLength(), msg + "\n", right);
