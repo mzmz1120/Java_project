@@ -103,6 +103,7 @@ public class ChattingView extends JFrame {
 		contentPane.add(scrollPane);
 
 		textArea = new JTextPane();
+		textArea.setBackground(new Color(173, 216, 230));
 		textArea.setEditable(true);
 		textArea.setFont(new Font("굴림체", Font.PLAIN, 14));
 		scrollPane.setViewportView(textArea);
@@ -229,7 +230,6 @@ public class ChattingView extends JFrame {
 						break;
 					} // catch문 끝
 				} // 바깥 catch문끝
-
 			}
 		}
 	}
