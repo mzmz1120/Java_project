@@ -13,6 +13,7 @@ import java.awt.Image;
 import java.awt.Color;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 import java.awt.event.ActionEvent;
 
 public class WaitingView extends JFrame {
@@ -20,6 +21,8 @@ public class WaitingView extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextField textField;
+	private Vector UserVec = new Vector(); // 연결된 사용자를 저장할 벡터
+	private Vector RoomVec = new Vector(); // 생성된 방룸
 	
 	/**
 	 * Create the frame.
